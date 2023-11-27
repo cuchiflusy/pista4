@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Juego del Ahorcado</title>
+  <style>
+    /* Estilos para el contenedor del juego */
+    #ahorcado {
+      text-align: center;
+      margin-top: 20px;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Estilos para el tablero, letras, botones, etc. */
+    #tablero {
+      margin-bottom: 20px;
+    }
+
+    .palabra {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    #muñeco {
+      font-size: 20px;
+      margin-bottom: 20px;
+      white-space: pre;
+    }
+
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 8px;
+      border: 1px solid black;
+    }
+
+    #mensaje {
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    #passwordContainer {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div id="ahorcado">
+  <div id="tablero">
+    <div class="palabrasSeparadas"></div>
+    <div class="palabra" id="palabra"></div>
+    <div id="muñeco"></div>
+    <div id="mensaje"></div>
+  </div>
+  <div id="passwordContainer">
+    <input type="password" id="password" placeholder="Contraseña para reiniciar">
+  </div>
+  <input type="text" id="letra" maxlength="1" placeholder="Ingresa una letra">
+  <button onclick="jugar()">Probar letra</button>
+  <button onclick="reiniciar()">Reiniciar</button>
+  <table>
+    <tr>
+      <th>Letras probadas</th>
+      <th>Letras falladas</th>
+    </tr>
+    <tr>
+      <td id="letrasProbadas"></td>
+      <td id="letrasFalladas"></td>
+    </tr>
+  </table>
+</div>
+
+<script>
+let palabra = "zona de picnic";
+let palabrasSeparadas = palabra.split(" ");
+let letrasAdivinadas = [];
+let letrasFalladas = [];
+let intentos = 0;
+const passwordCorrecta = "inutil";
+
+function mostrarMuñeco(intentos) {
+  let dibujo = [
+    " -------",
+    " |     |",
+    " |     " + (intentos > 0 ? "O" : ""),
+    " |    " + (intentos > 1 ? "/" : " ") + (intentos > 2 ? "|" : "") + (intentos > 3 ? "\\" : ""),
+    " |    " + (intentos > 4 ? "/ " : " ") + (intentos > 5 ? "\\" : ""),
+    "-+-"
+  ];
+
+  if (intentos >= 7) {
+    dibujo[2] = " |     X";
+  }
+
+  let dibujoFinal = dibujo.join("<br>");
+  document.getElementById("muñeco").innerHTML = dibujoFinal;
+}
+
+function mostrarTablero() {
+  mostrarMuñeco(intentos);
+
+  let palabrasSeparadasMostradas = palabrasSeparadas.map(palabra => "_".repeat(palabra.length)).join(" ");
+  document.querySelector('.palabrasSeparadas').innerText = palabrasSeparadasMostradas;
+
+  let palabraMostrada = "";
+  for (let letra of palabra) {
+    if (letrasAdivinadas.includes(letra) || letra === " ") {
+      palabraMostrada += letra + " ";
+    } else {
+      palabraMostrada += "_ ";
+    }
+  }
+  document.getElementById("palabra").innerText = palabraMostrada;
+
+  document.getElementById("letrasProbadas").innerText = letrasAdivinadas.join(", ");
+  document.getElementById("letrasFalladas").innerText = letrasFalladas.join(", ");
+}
+
+function esLetra(caracter) {
+  return /^[a-zA-Z]$/.test(caracter);
+}
+
+function letraYaAdivinada(letra) {
+  return letrasAdivinadas.includes(letra);
+}
+
+function actualizarLetrasAdivinadas(letra) {
+  if (palabra.includes(letra)) {
+    letrasAdivinadas.push(letra);
+  } else {
+    letrasFalladas.push(letra);
+    intentos++;
+  }
+}
+
+function juegoTerminado() {
+  return intentos >= 7 || palabraCompleta();
+}
+
+function palabraCompleta() {
+  return palabra.split('').every(letra => letrasAdivinadas.includes(letra) || letra === " ");
+}
+
+function mostrarMensaje(mensaje) {
+  document.getElementById("mensaje").innerText = mensaje;
+}
+
+function reiniciar() {
+  const passwordIngresada = document.getElementById("password").value;
+  if (passwordIngresada.toLowerCase() !== passwordCorrecta) {
+    mostrarMensaje("Contraseña incorrecta");
+    return;
+  }
+
+  letrasAdivinadas = [];
+  letrasFalladas = [];
+  intentos = 0;
+  mostrarTablero();
+  mostrarMensaje("");
+}
+
+function jugar() {
+  let letraUsuario = document.getElementById("letra").value.toLowerCase();
+
+  if (!esLetra(letraUsuario)) {
+    mostrarMensaje("Entrada inválida. Ingresa una letra.");
+    return;
+  }
+
+  if (letraYaAdivinada(letraUsuario)) {
+    mostrarMensaje("¡Ya has intentado con esa letra! Prueba otra.");
+    return;
+  }
+
+  actualizarLetrasAdivinadas(letraUsuario);
+  mostrarTablero();
+
+  if (juegoTerminado()) {
+    let mensaje = intentos >= 7 ? "¡Oh no! ¡Has perdido!" : "¡Felicidades! ¡Has ganado!";
+    mostrarMensaje(mensaje);
+
+    if (intentos >= 7) {
+      document.getElementById("passwordContainer").style.display = "block";
+    } else {
+      document.getElementById("passwordContainer").style.display = "none";
+    }
+  }
+}
+
+mostrarTablero();
+</script>
+
+</body>
+</html>
