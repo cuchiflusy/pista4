@@ -50,7 +50,6 @@
 
 <div id="ahorcado">
   <div id="tablero">
-    <div class="palabrasSeparadas"></div>
     <div class="palabra" id="palabra"></div>
     <div id="muñeco"></div>
     <div id="mensaje"></div>
@@ -75,7 +74,6 @@
 
 <script>
 let palabra = "estepicursor";
-let palabrasSeparadas = palabra.split(" ");
 let letrasAdivinadas = [];
 let letrasFalladas = [];
 let intentos = 0;
@@ -101,9 +99,6 @@ function mostrarMuñeco(intentos) {
 
 function mostrarTablero() {
   mostrarMuñeco(intentos);
-
-  let palabrasSeparadasMostradas = palabrasSeparadas.map(palabra => "_".repeat(palabra.length)).join(" ");
-  document.querySelector('.palabrasSeparadas').innerText = palabrasSeparadasMostradas;
 
   let palabraMostrada = "";
   for (let letra of palabra) {
